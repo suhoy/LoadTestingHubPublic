@@ -1,0 +1,11 @@
+build
+.idea
+.gradle
+*.iml
+out
+!work/image/test.png
+!work/image/dummy1.png
+src/main/resources/application-local.yml
+logs/*
+logs
+application-dev.yml

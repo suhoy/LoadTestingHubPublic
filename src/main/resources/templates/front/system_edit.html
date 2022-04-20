@@ -1,0 +1,134 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="front/fragments/header :: head">
+
+</head>
+
+<body data-spy="scroll" data-target="#toc">
+
+<!-- main menu -->
+<div th:replace="front/fragments/header :: main-menu"></div>
+<!-- /main menu -->
+
+<div id="outer-container"
+     style="display: table;
+            width: 100%;
+            height: 100%;">
+
+    <div
+            style="padding-top: 32px;
+            display: table-cell;
+            width: 15%;
+            vertical-align: top;">
+        <!-- table of content-->
+        <div id="sidebar" class="sidebar sticky-top" style="padding-top: 64px;">
+            <nav id="toc" data-spy="affix"><!--data-toggle="toc"-->
+                <br><br>
+                <div sec:authorize="hasRole('ROLE_DEVELOPER')">
+                    <!--<a class="btn btn-primary btn-sm btn-block" role="button" th:href="@{/}">К
+                        системам</a>
+                <br>-->
+                <!--
+                    <a class="btn btn-primary btn-sm btn-block" role="button"
+                       th:href="@{/runs(id=${system.id})}">Работа с тестами</a>
+                    <br>
+                    <a class="btn btn-primary btn-sm btn-block" role="button"
+                       th:href="@{/reports(id=${system.id})}">Работа с отчётами</a>
+                    <br>
+                    -->
+                    <a class="btn btn-success btn-sm btn-block" role="button"
+                       th:href="@{/system_view(id=${system.id})}">Открыть
+                        на
+                        просмотр</a>
+                    <br>
+                </div>
+                <!--
+                                <script type="text/javascript">
+                                    $(document).ready(function () {
+                                        Toc.init({
+                                            $nav: $("#toc"),
+                                            $scope: $("#c1,#c2")
+                                        });
+                                    });
+                                </script>-->
+            </nav>
+        </div>
+    </div>
+
+
+    <!-- Page Content -->
+    <div id="content" class="container"
+         style="display: table-cell;
+            width: 85%;
+            vertical-align: top;">
+        <!--<div class="row">-->
+        <div class="col-lg-12 text-center">
+            <br>
+
+            <div class="card">
+                <div class="card-body">
+                    <form class="card p-3 bg-light" action="#savestatus" th:action="@{/system/save}"
+                          th:object="${system}" method="post"><!--enctype="multipart/form-data"-->
+                        <input type="hidden" th:field="*{id}"/>
+                        <br>
+                        <div class="form-row">
+                            <br>
+                            <div class="form-group col-md-12">
+                                <small id="name_label" class="form-text text-muted">Название системы</small>
+                                <input th:field="*{name}" type="text" class="form-control form-control-sm"
+                                       th:value="*{name}"></input>
+
+                                <br>
+                                <small id="info_label1" class="form-text text-muted">Информация о системе</small>
+                                <textarea th:name="about" type="text" rows="4"
+                                          th:id="'summedit_info_1'" placeholder="Content"
+                                          th:value="*{about}"
+                                          th:text="*{about}"
+                                          class="form-control summer"
+                                          autocomplete="off"></textarea>
+                                <br>
+                                <small id="info_label2" class="form-text text-muted">Информация по тестам</small>
+                                <textarea th:name="runs_about" type="text" rows="4"
+                                          th:id="'summedit_info_2'" placeholder="Content"
+                                          th:value="*{runs_about}"
+                                          th:text="*{runs_about}"
+                                          class="form-control summer"
+                                          autocomplete="off"></textarea>
+                                <br>
+                                <small id="info_label3" class="form-text text-muted">Информация по отчётам</small>
+                                <textarea th:name="reports_about" type="text" rows="4"
+                                          th:id="'summedit_info_3'" placeholder="Content"
+                                          th:value="*{reports_about}"
+                                          th:text="*{reports_about}"
+                                          class="form-control summer"
+                                          autocomplete="off"></textarea>
+
+                                <input type="submit" class="btn btn-primary center-block "
+                                       th:value="Сохранить"
+                                       name="action"/>
+                            </div>
+
+                            <script>
+                                $('#summedit_info_1').summernote({
+                                    height: 200
+                                });
+                                $('#summedit_info_2').summernote({
+                                    height: 200
+                                });
+                                $('#summedit_info_3').summernote({
+                                    height: 200
+                                });
+                            </script>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <br>
+        </div>
+
+    </div>
+</div>
+</div>
+</body>
+</html>

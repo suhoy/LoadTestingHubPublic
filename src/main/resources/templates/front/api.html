@@ -1,0 +1,971 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="front/fragments/header :: head">
+
+</head>
+
+<script type="text/javascript">hljs.highlightAll();</script>
+
+<body data-spy="scroll" data-target="#toc">
+
+<!-- main menu -->
+<div th:replace="front/fragments/header :: main-menu"></div>
+<!-- /main menu -->
+
+
+<div id="outer-container"
+     style="display: table;
+            width: 100%;
+            height: 100%;">
+
+    <div style="padding-top: 32px;
+            display: table-cell;
+            width: 20%;
+            vertical-align: top;">
+        <!-- table of content-->
+        <div id="sidebar" class="sidebar sticky-top" style="padding-top: 64px;">
+            <nav id="toc" data-spy="affix" data-toggle="toc">
+                <script type="text/javascript">
+                    Toc.init({
+                        $nav: $("#toc"),
+                        $scope: $("h1, h2, h3, h4, h5, h6")
+                    });
+
+                </script>
+            </nav>
+
+        </div>
+    </div>
+
+
+    <!-- Page Content -->
+    <div id="content" class="container"
+         style="display: table-cell;
+            width: 80%;
+            vertical-align: top;">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <!--<h1 th:text="'API'"/>-->
+                <h1 class="mt-5" th:text="'API'"/>
+                <br>
+                <p>
+                    <!--<h4 th:text="'Подготовка'"/>
+                    <br>
+                    <p>-->
+                <div class="panel-group">
+
+                    <!--Предусловие-->
+                <div class="card">
+                    <div class="panel panel-default card-body">
+                        <div class="panel-heading">
+                            <h4 class="panel-title text-left mt-3">
+                                <a data-toggle="collapse" href="#collapse1">Предусловие</a>
+                            </h4>
+                        </div>
+                        <div id="collapse1" class="panel-collapse collapse">
+                            <!--pre-scrollable-->
+                            <!--text-light bg-dark--> <!--<code class="language-json">-->
+                            <pre class="text-left"><code class="language-http">
+При работе по api необходимо использовать basic auth c учетной записью с правами USER.
+При проблеме с кодировкой используйте Header "Content-Type: application/json; charset=UTF-8".
+Для работы с системами нужны права DEVELOPER.
+Для получения прав обратитесь к администратору сервиса.
+                            </code></pre>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                    <!--Работа с системами-->
+                <div class="card">
+                    <div class="panel panel-default card-body">
+                        <div class="panel-heading">
+                            <h4 class="panel-title text-left mt-3">
+                                <a data-toggle="collapse" href="#collapse2">Работа с системами</a>
+                            </h4>
+                        </div>
+                        <div id="collapse2" class="panel-collapse collapse">
+
+                            <h5>Добавить систему</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Запрос
+POST /api/add/system HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 21
+
+{
+  "name" : "SystemName3"
+}
+
+Ответ
+{
+  "id": 3,
+  "name": "SystemName3"
+}
+                            </code></pre>
+
+                            <h5>Получить список систем</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Запрос
+GET /api/get/systems/all HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+Ответ
+[
+  {
+    "id": 1,
+    "name": "SystemName1"
+  },
+  {
+    "id": 2,
+    "name": "SystemName2"
+  }
+]
+                            </code></pre>
+
+                            <h5>Удалить систему</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+!! Удаление системы влечёт удаление всех связанных сущностей, включая тесты и отчёты
+В теле запроса обязательно должны присутсвовать поля id и name
+
+Запрос
+DELETE /api/delete/system HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 32
+
+{
+  "id": 3,
+  "name": "System Name 3"
+}
+
+Ответ
+{
+  "result": "ok"
+}
+
+                            </code></pre>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                    <!--Работа с тестами-->
+                <div class="card">
+                    <div class="panel panel-default card-body">
+                        <div class="panel-heading">
+                            <h4 class="panel-title text-left mt-3">
+                                <a data-toggle="collapse" href="#collapse3">Работа с тестами</a>
+                            </h4>
+                        </div>
+                        <div id="collapse3" class="panel-collapse collapse">
+
+                            <h5>Добавить тест</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Система задаётся параметром system_id в url
+
+Запрос
+POST /api/add/run?system_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 118
+
+{
+  "name" : "Название теста",
+  "time_start" : "2020-01-01T07:55",
+  "time_finish" :  "2021-12-23T22:01"
+}
+
+Ответ
+{
+  "id": 4,
+  "visible": false,
+  "name": "Название теста",
+  "status": "created",
+  "time_start": "2020-01-01T07:55:00",
+  "time_finish": "2021-12-23T22:01:00"
+}
+                                </code></pre>
+
+                            <h5>Получить список всех тестов</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Запрос
+GET /api/get/runs/all HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+Ответ
+[
+  {
+    "id": 2,
+    "visible": false,
+    "name": "Run Name 2",
+    "status": "fail",
+    "time_start": "2021-10-18T00:00:01",
+    "time_finish": "2021-10-19T00:00:01"
+  },
+  {
+    "id": 1,
+    "visible": true,
+    "name": "Run Name 1",
+    "status": "pass",
+    "time_start": "2021-10-17T00:00:01",
+    "time_finish": "2021-10-18T00:00:01"
+  }
+]
+                                </code></pre>
+
+                            <h5>Получить список тестов по системе</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Система задаётся параметром system_id в url
+
+Запрос
+GET /api/get/runs?system_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+Ответ
+[
+  {
+    "id": 2,
+    "visible": false,
+    "name": "Run Name 2",
+    "status": "fail",
+    "time_start": "2021-10-18T00:00:01",
+    "time_finish": "2021-10-19T00:00:01"
+  },
+  {
+    "id": 1,
+    "visible": true,
+    "name": "Run Name 1",
+    "status": "pass",
+    "time_start": "2021-10-17T00:00:01",
+    "time_finish": "2021-10-18T00:00:01"
+  }
+]
+                                </code></pre>
+                            <h5>Получить список тестов по системе с похожим названием</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Система задаётся параметром system_id в url, поиск похожих систем происходит функцией contains ignore case по параметру name
+
+GET /api/get/runs/by_name?system_id=1&name=exa HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+Ответ
+[
+  {
+    "id": 1,
+    "visible": true,
+    "name": "Example test",
+    "status": "pass",
+    "time_start": "2021-10-17T00:00:01",
+    "time_finish": "2021-10-18T00:00:01"
+  },
+  {
+    "id": 4,
+    "visible": false,
+    "name": "Some example test2",
+    "status": "created",
+    "time_start": "2020-01-01T07:55:00",
+    "time_finish": "2021-12-23T22:01:00"
+  }
+]
+                                </code></pre>
+                            <h5>Удалить тест</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+!! Удаление теста влечёт удаление всех его данных, включая описание, вложения, статистику и графики
+В теле запроса обязательно должны присутсвовать поля id и name
+
+Запрос
+DELETE /api/delete/run HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 29
+
+{
+  "id" : 4,
+  "name" : "Run Name 4"
+}
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                    <!--Работа со статистикой-->
+                <div class="card">
+                    <div class="panel panel-default card-body">
+                        <div class="panel-heading">
+                            <h4 class="panel-title text-left mt-3">
+                                <a data-toggle="collapse" href="#collapse4">Работа со статистикой теста</a>
+                            </h4>
+                        </div>
+                        <div id="collapse4" class="panel-collapse collapse">
+
+                            <h5>Добавить статистику к тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+POST /api/add/stats?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 15
+
+[
+ {
+  "time_start": "2022-01-12T20:55",
+  "time_finish": "2022-01-12T21:00",
+  "profile": 100,
+  "about": "",
+  "stats": [
+   {
+    "script": "Correlation_Challenge_Mod",
+    "sla": 1.5,
+    "profile": 600,
+    "child_list": [
+     {
+      "script": "ex0",
+      "sla": 2.5,
+      "profile": 1200,
+      "pass_count": 1199,
+      "stat_time": [
+       {
+       	"tag": "99.5%",
+       	"pass_time": 2.499
+       },
+       {
+       	"tag": "99.9%",
+       	"pass_time": 2.5
+       }
+      ]
+     }
+   	],
+   	"pass_count": 478,
+   	"fail_count": 120,
+   	"stat_time": [
+   	 {
+   	  "tag": "99.5%",
+   	  "pass_time": 1.867,
+   	  "fail_time": 1.827
+   	 },
+   	 {
+   	  "tag": "99.9%",
+   	  "pass_time": 1.992,
+   	  "fail_time": 1.957
+   	 }
+   	]
+   }
+  ],
+  "tps": 2
+ },
+ {
+  "time_start": "2022-01-12T21:01",
+  "time_finish": "2022-01-12T21:06",
+  "profile": 200,
+  "about": "",
+  "stats": [
+   {
+   	"script": "Correlation_Challenge_Mod",
+   	"sla": 1.5,
+   	"profile": 1200,
+   	"child_list": [
+     {
+      "script": "ex0",
+      "sla": 2.5,
+      "profile": 2400,
+      "pass_count": 2403,
+      "stat_time": [
+       {
+       	"tag": "99.5%",
+       	"pass_time": 2.498
+       },
+       {
+       	"tag": "99.9%",
+       	"pass_time": 2.5
+       }
+      ]
+     }
+   	],
+   	"pass_count": 987,
+   	"fail_count": 210,
+   	"stat_time": [
+   	 {
+   	  "tag": "99.5%",
+   	  "pass_time": 1.861,
+   	  "fail_time": 1.738
+   	 },
+   	 {
+   	  "tag": "99.9%",
+   	  "pass_time": 2.319,
+   	  "fail_time": 2.218
+   	 }
+   	]
+   }
+  ],
+  "tps": 4
+ }
+]
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+
+                            <h5>Получить статистику по тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+GET /api/get/stats?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+
+Ответ
+[
+  {
+    "id": 306,
+    "profile": 110.0,
+    "tps": 1.0,
+    "about": "about period 1",
+    "stats": [
+      {
+        "id": 255,
+        "sla": 1.95,
+        "profile": 3500,
+        "pass_count": 3500,
+        "script": "script_child_1",
+        "fail_count": 0,
+        "stat_time": [
+          {
+            "id": 329,
+            "tag": "95%",
+            "pass_time": 0.95,
+            "fail_time": 0.05
+          },
+          {
+            "id": 330,
+            "tag": "99%",
+            "pass_time": 0.99,
+            "fail_time": 0.09
+          }
+        ],
+        "child_list": []
+      },
+      {
+        "id": 256,
+        "sla": 1.95,
+        "profile": 100,
+        "pass_count": 0,
+        "script": "script_child_2",
+        "fail_count": 100,
+        "stat_time": [
+          {
+            "id": 331,
+            "tag": "95%",
+            "pass_time": 0.95,
+            "fail_time": 0.05
+          },
+          {
+            "id": 332,
+            "tag": "99%",
+            "pass_time": 0.99,
+            "fail_time": 0.09
+          }
+        ],
+        "child_list": []
+      },
+      {
+        "id": 254,
+        "sla": 1.95,
+        "profile": 3600,
+        "pass_count": 3599,
+        "script": "script_parent",
+        "fail_count": 1,
+        "stat_time": [
+          {
+            "id": 333,
+            "tag": "95%",
+            "pass_time": 0.95,
+            "fail_time": 0.05
+          },
+          {
+            "id": 334,
+            "tag": "99%",
+            "pass_time": 0.99,
+            "fail_time": 0.09
+          }
+        ],
+        "child_list": [
+          255,
+          256
+        ]
+      }
+    ],
+    "time_start": "2022-01-11T07:55:00",
+    "time_finish": "2022-01-11T22:01:00"
+  },
+  {
+    "id": 307,
+    "profile": 120.0,
+    "tps": 2.0,
+    "about": "about period 2",
+    "stats": [
+      {
+        "id": 258,
+        "sla": 1.95,
+        "profile": 3500,
+        "pass_count": 3500,
+        "script": "script_child_1",
+        "fail_count": 0,
+        "stat_time": [
+          {
+            "id": 335,
+            "tag": "95%",
+            "pass_time": 0.95,
+            "fail_time": 0.05
+          },
+          {
+            "id": 336,
+            "tag": "99%",
+            "pass_time": 0.99,
+            "fail_time": 0.09
+          }
+        ],
+        "child_list": []
+      },
+      {
+        "id": 259,
+        "sla": 1.95,
+        "profile": 100,
+        "pass_count": 0,
+        "script": "script_child_2",
+        "fail_count": 100,
+        "stat_time": [
+          {
+            "id": 337,
+            "tag": "95%",
+            "pass_time": 0.95,
+            "fail_time": 0.05
+          },
+          {
+            "id": 338,
+            "tag": "99%",
+            "pass_time": 0.99,
+            "fail_time": 0.09
+          }
+        ],
+        "child_list": []
+      },
+      {
+        "id": 257,
+        "sla": 1.95,
+        "profile": 3600,
+        "pass_count": 3598,
+        "script": "script_parent",
+        "fail_count": 2,
+        "stat_time": [
+          {
+            "id": 339,
+            "tag": "95%",
+            "pass_time": 0.95,
+            "fail_time": 0.05
+          },
+          {
+            "id": 340,
+            "tag": "99%",
+            "pass_time": 0.99,
+            "fail_time": 0.09
+          }
+        ],
+        "child_list": [
+          258,
+          259
+        ]
+      }
+    ],
+    "time_start": "2022-01-12T07:55:00",
+    "time_finish": "2022-01-12T22:01:00"
+  }
+]
+                                </code></pre>
+
+                            <h5>Удалить всю статистику по тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+DELETE /api/delete/stats?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+                            <!--<h5>Удалить конкретные записи статистики</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Запрос
+DELETE /api/delete/stats HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 46
+
+[
+  {
+    "id": 4
+  },
+  {
+    "id": 5
+  }
+]
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>-->
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                    <!--Работа с описанием-->
+                <div class="card">
+                    <div class="panel panel-default card-body">
+                        <div class="panel-heading">
+                            <h4 class="panel-title text-left mt-3">
+                                <a data-toggle="collapse" href="#collapse5">Работа с описаниями теста</a>
+                            </h4>
+                        </div>
+                        <div id="collapse5" class="panel-collapse collapse">
+
+                            <h5>Добавить описания к тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+POST /api/add/infos?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 153
+
+[
+ {
+    "tag": "Description5",
+    "data": "Info about test 1, could be in html"
+ },
+ {
+    "tag": "Description6",
+    "data": "&lt;p&gt;Info about test 1, could be in html&lt;/p&gt;"
+ }
+]
+
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+
+                            <h5>Получить описания по тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+GET /api/get/infos?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+
+Ответ
+[
+  {
+    "id": 1,
+    "tag": "Test Description 1",
+    "data": "Info about test 1, could be in html"
+  },
+  {
+    "id": 4,
+    "tag": "Test Description 4",
+    "data": "&lt;p&gt;Info about test 1, could be in html&lt;/p&gt;"
+  }
+]
+                                </code></pre>
+
+                            <h5>Удалить все описания по тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+DELETE /api/delete/infos/all?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+                            <h5>Удалить конкретные описания</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Запрос
+DELETE /api/delete/infos HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 44
+
+[
+  {
+    "id": 5
+  },
+  {
+    "id": 6
+  }
+]
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                    <!--Работа с графиками-->
+                <div class="card">
+                    <div class="panel panel-default card-body">
+                        <div class="panel-heading">
+                            <h4 class="panel-title text-left mt-3">
+                                <a data-toggle="collapse" href="#collapse6">Работа с графиками теста</a>
+                            </h4>
+                        </div>
+                        <div id="collapse6" class="panel-collapse collapse">
+
+                            <h5>Добавить график к тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест, тег и описание задаётся параметрами run_id, tag и about в url
+
+Запрос
+POST /api/add/graph?run_id=1&tag=tag_for_pic&about=image_description HTTP/1.1
+Content-Type: multipart/form-data
+Authorization: Basic
+Content-Length: 199267
+
+(194 KB hidden)
+
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+
+                            <h5>Получить графики по тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+GET /api/get/graphs?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+
+Ответ
+[
+  {
+    "id": 1,
+    "name": "cpu.png",
+    "tag": "1. resources util",
+    "type": "data/png",
+    "about": "cpu usage"
+  },
+  {
+    "id": 7,
+    "name": "cat.jpg",
+    "tag": "tag_for_pic",
+    "type": "image/jpeg",
+    "about": "image_description"
+  }
+]
+                                </code></pre>
+
+                            <h5>Удалить все графики по тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+DELETE /api/delete/graphs/all?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+                            <h5>Удалить конкретные графики</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Запрос
+DELETE /api/delete/graphs HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 44
+
+[
+  {
+    "id": 1
+  },
+  {
+    "id": 2
+  }
+]
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                    <!--Работа с вложениями-->
+                 <div class="card">
+                    <div class="panel panel-default card-body">
+                        <div class="panel-heading">
+                            <h4 class="panel-title text-left mt-3">
+                                <a data-toggle="collapse" href="#collapse7">Работа с вложениями теста</a>
+                            </h4>
+                        </div>
+                        <div id="collapse7" class="panel-collapse collapse">
+
+                            <h5>Добавить вложение к тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест и тег задаётся параметрами run_id и tag в url
+Вложение в multipart/form-data
+
+Запрос
+POST /api/add/attach?run_id=1&tag=tag_for_attach HTTP/1.1
+Content-Type: multipart/form-data
+Authorization: Basic
+Content-Length: 199267
+
+(194 KB hidden)
+
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+
+                            <h5>Получить вложения по тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+GET /api/get/attaches?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+
+Ответ
+[
+  {
+    "id": 4,
+    "name": "cpu.jpg",
+    "tag": "tag_for_attach1",
+    "type": "image/jpeg"
+  },
+  {
+    "id": 5,
+    "name": "ram.jpg",
+    "tag": "tag_for_attach2",
+    "type": "image/jpeg"
+  }
+]
+                                </code></pre>
+
+                            <h5>Удалить все вложения по тесту</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Тест задаётся параметром run_id в url
+
+Запрос
+DELETE /api/delete/attaches/all?run_id=1 HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 0
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+                            <h5>Удалить конкретные вложения</h5>
+                            <pre class="text-left pre-scrollable"><code class="language-http">
+Запрос
+DELETE /api/delete/attaches HTTP/1.1
+Content-Type: application/json
+Authorization: Basic
+Content-Length: 44
+
+[
+  {
+    "id": 1
+  },
+  {
+    "id": 2
+  }
+]
+
+
+Ответ
+{
+  "result": "ok"
+}
+                                </code></pre>
+                        </div>
+                    </div>
+                 </div>
+                <br>
+
+                </div>
+
+            </div>
+        </div>
+
+        <br>
+        <br>
+        <br>
+    </div>
+
+
+</div>
+</body>
+</html>

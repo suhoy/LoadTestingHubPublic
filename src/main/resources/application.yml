@@ -1,0 +1,44 @@
+spring:
+    datasource:
+        driver-class-name: org.postgresql.Driver
+        url: jdbc:postgresql://127.0.0.1/CHANGE_ME
+        username: CHANGE_ME
+        password: CHANGE_ME
+        initialization-mode: never
+    http:
+        encoding:
+            charset: UTF-8
+            enabled: true
+            force: true
+    jpa:
+        properties:
+            hibernate:
+                temp:
+                    use_jdbc_metadata_defaults: false
+        hibernate:
+            ddl-auto: validate
+
+        database-platform: org.hibernate.dialect.PostgreSQLDialect
+    resources:
+        cache:
+            period: 0s
+    servlet:
+        multipart:
+            enabled: true
+            max-file-size: 50MB
+            max-request-size: 50MB
+    queries:
+        roles-query: SELECT u.email, r.role from public.user u inner join public.user_roles ur on (u.id=ur.user_id) inner join public.role r on (ur.role_id=r.id) where u.email=?;
+        users-query: SELECT email, password, active FROM public.user where email=?;
+upload:
+    work-dir: work
+server:
+    address: 192.168.1.89
+    port: 8080
+
+project:
+    name: Project LT
+    regmails: .*@example.ru, .*@ex.com, .*@mail.info
+    about: We do smthg
+    somecode: 332211
+    passchange: Exxampple!

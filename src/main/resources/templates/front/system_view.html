@@ -1,0 +1,216 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="front/fragments/header :: head">
+
+</head>
+
+<body data-spy="scroll" data-target="#toc">
+
+<!-- main menu -->
+<div th:replace="front/fragments/header :: main-menu"></div>
+<!-- /main menu -->
+
+<script th:inline="javascript">
+
+    $(document).ready(function () {
+        //добавить проверку что есть эвенты
+
+        var system_idd = [(${system.id})];
+        $('#calendar').fullCalendar({
+            header: {
+                center: 'prev,next,today',
+                left: 'title',
+                right: 'listMonth, month'
+            },
+            defaultView: "month",
+            defaultDate: moment().format("YYYY-MM-DD"),
+            editable: false,
+            eventLimit: false,
+            locale: "ru",
+            displayEventTime: false,
+            //events:[(${events})]
+            events: "/api/get/runs/json/calendar?system_id=" + system_idd,
+            eventRender: function(event, element) {
+                $(element).tooltip({title: event.title});
+            }
+
+        });
+
+        var b1 = document.getElementsByClassName('fc-listMonth-button fc-button fc-state-default fc-corner-left fc-corner-right');
+        b1.item(0).innerHTML = "Список";
+
+        var b2 = document.getElementsByClassName('fc-month-button fc-button fc-state-default fc-corner-left fc-corner-right fc-state-active');
+        b2.item(0).innerHTML = "Календарь";
+
+        $('#calendar2').fullCalendar({
+            defaultView: "listMonth",
+            defaultDate: moment().format("YYYY-MM-DD"),
+            editable: false,
+            eventLimit: false,
+            locale: "ru",
+            displayEventTime: false,
+            //events:[(${events})]
+            events: "/api/get/reports/json/calendar?system_id=" + system_idd
+
+        });
+
+        $("#calendar").fullCalendar('refresh');
+        $("#calendar2").fullCalendar('refresh');
+
+    });
+
+</script>
+
+<style>
+    .fc-sat {
+        color: #ff92a0;
+    }
+
+    .fc-sun {
+        color: #ff92a0;
+    }
+</style>
+
+<div id="outer-container"
+     style="display: table;
+            width: 100%;
+            height: 100%;">
+
+
+    <div
+            style="padding-top: 32px;
+            display: table-cell;
+            width: 15%;
+            vertical-align: top;">
+        <!-- table of content-->
+        <div id="sidebar" class="sidebar sticky-top" style="padding-top: 64px;">
+            <nav id="toc" data-spy="affix"><!--data-toggle="toc"-->
+                <!--<br><br>
+                <a class="btn btn-primary btn-sm btn-block" role="button" th:href="@{/}">К
+                    системам</a>
+                <br>-->
+                <div sec:authorize="hasRole('ROLE_USER')">
+                    <a class="btn btn-primary btn-sm btn-block" role="button"
+                       th:href="@{/runs(id=${system.id})}">Работа с тестами</a>
+                    <br>
+                    <a class="btn btn-primary btn-sm btn-block" role="button"
+                       th:href="@{/reports(id=${system.id})}">Работа с отчётами</a>
+                    <br>
+                </div>
+
+                <div sec:authorize="hasRole('ROLE_VIEWER')">
+                <a class="btn btn-info btn-sm btn-block" role="button" th:href="@{/pdf_system(id=${system.id})}">Скачать
+                    выгрузку PDF</a>
+                <br>
+                </div>
+                <div sec:authorize="hasRole('ROLE_DEVELOPER')">
+                    <a class="btn btn-success btn-sm btn-block" role="button"
+                       th:href="@{/system_edit(id=${system.id})}">Открыть
+                        на
+                        редактирование</a>
+                    <br>
+                </div>
+
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        Toc.init({
+                            $nav: $("#toc"),
+                            $scope: $("#c1,#c2")
+                        });
+                    });
+                </script>
+            </nav>
+        </div>
+    </div>
+
+
+    <!-- Page Content -->
+    <div id="content" class="container"
+         style="display: table-cell;
+            width: 85%;
+            vertical-align: top;">
+        <!--<div class="row">-->
+        <div class="col-lg-12 text-center">
+            <br>
+            <h1 th:text="${system.name}"></h1>
+            <br>
+
+            <!--
+            <p>Менеджер: </p>
+            <p>Инженеры: </p>
+            <p>Информация о системе: length()>0</p>
+            -->
+
+            <div th:if="${system.about!= null}" class="card">
+                <div class="card-body">
+                    <p class="text-center" th:utext="${system.about}"></p>
+                    <br>
+                </div>
+            </div>
+            <br>
+
+
+            <div class="card">
+                <div class="card-body">
+                    <div class="row h-70 justify-content-center">
+                        <div class="col-9">
+                            <h2 id="c1" class="text-left" th:text="'Календарь тестов'"></h2>
+                            <div id="calendar"></div>
+                        </div>
+                        <!--<div class="col">
+                            <h2 class="text-left" th:text="'Список отчётов'"></h2>
+                            <div id="calendar2"></div>-->
+
+                        <!--<div sec:authorize="hasRole('ROLE_ADMIN')">
+                            <br>
+                            <div class="row">
+                                <div class="col">
+                                    <a class="btn btn-sm btn-primary" role="button"
+                                       th:href="@{/runs(id=${system.id})}">Работа с тестами</a>
+                                </div>
+                                <div class="col">
+                                    <a class="btn btn-sm btn-primary" role="button"
+                                       th:href="@{/reports(id=${system.id})}">Работа с отчётами</a>
+                                </div>
+                            </div>
+
+                        </div>-->
+
+                    </div>
+                </div>
+            </div>
+            <br>
+            <div class="card">
+                <div class="card-body">
+                    <div class="row h-70 justify-content-center">
+                        <div class="col-9 align-self-center">
+                            <h2 id="c2" class="text-left" th:text="'Список отчётов'"></h2>
+                            <div data-toc-skip id="calendar2"></div>
+                            <!--<div sec:authorize="hasRole('ROLE_ADMIN')">
+                                <br>
+                                <div class="row">
+                                    <div class="col">
+                                        <a class="btn btn-sm btn-primary" role="button"
+                                           th:href="@{/runs(id=${system.id})}">Работа с тестами</a>
+                                    </div>
+                                    <div class="col">
+                                        <a class="btn btn-sm btn-primary" role="button"
+                                           th:href="@{/reports(id=${system.id})}">Работа с отчётами</a>
+                                    </div>
+                                </div>
+
+                            </div>-->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+        <br>
+
+        <!--</div>-->
+    </div>
+</div>
+</div>
+</body>
+</html>

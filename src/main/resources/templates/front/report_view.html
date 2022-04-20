@@ -1,0 +1,162 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="front/fragments/header :: head">
+
+
+</head>
+
+<body data-spy="scroll" data-target="#toc">
+
+
+<!-- main menu -->
+<div th:replace="front/fragments/header :: main-menu"></div>
+<!-- /main menu -->
+<div id="outer-container"
+     style="display: table;
+            width: 100%;
+            height: 100%;">
+
+    <!-- side bar https://usefulangle.com/post/61/html-page-with-left-sidebar-main-content-with-css -->
+    <div
+            style="padding-top: 32px;
+            display: table-cell;
+            width: 15%;
+            vertical-align: top;">
+        <!-- table of content-->
+        <div id="sidebar" class="sidebar sticky-top" style="padding-top: 64px;">
+            <nav id="toc" data-spy="affix"><!--data-toggle="toc"-->
+                <!--<br><br>-->
+                <a class="btn btn-primary btn-sm btn-block" role="button"
+                   th:href="@{/system_view(id=${report.system.id})}">К
+                    календарю</a>
+                <br>
+                <a sec:authorize="hasRole('ROLE_USER')" class="btn btn-primary btn-sm btn-block" role="button"
+                   th:href="@{/reports(id=${report.system.id})}">К списку отчётов</a>
+                <br sec:authorize="hasRole('ROLE_USER')">
+                <a class="btn btn-info btn-sm btn-block" role="button" th:href="@{/pdf_report(id=${report.id})}">Скачать
+                    PDF</a>
+                <br>
+                <a sec:authorize="hasRole('ROLE_USER')" class="btn btn-success btn-sm btn-block" role="button"
+                   th:href="@{/report_edit(id=${report.id})}">Открыть
+                    на
+                    редактирование</a>
+                <br>
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        Toc.init({
+                            $nav: $("#toc"),
+                            $scope: $("h4, h5")
+                        });
+                    });
+                </script>
+            </nav>
+        </div>
+    </div>
+
+
+    <!--разные функции отображения
+<p th:about="${run.isVisible()} ? 'Этот запуск видим' : 'Этот запуск скрыт'"></p>
+<div th:switch="${run.isVisible()}">
+</div>-->
+    <!-- проверка на наличие элементов в листе<div th:if="${not #lists.isEmpty(attaches)}">-->
+
+    <!-- Page Content -->
+    <div id="content" class="container"
+         style="display: table-cell;
+            width: 85%;
+            vertical-align: top;">
+        <div class="row">
+            <div class="col-lg-12 text-center">
+                <h1 th:text="${report.name}"></h1>
+                <h6><span>Система: </span> <a th:href="${'/system_view?id=' + report.system.id}"
+                                              th:text="${report.system.getName()}"></a></h6>
+                <h6><span>Автор: </span> <a th:if="${report.user}" th:href="${'mailto:' + report.user.getEmail()}"
+                                            th:text="${report.user.getFirstName() + ' ' + report.user.getLastName()}"></a>
+                </h6>
+                <br>
+                <h6 th:text="'Дата создания: ' + ${df.format(report.date_created)}"></h6>
+
+
+                <br th:if="${!report.infos.isEmpty()}">
+                <br th:if="${!report.infos.isEmpty()}">
+                <div th:if="${!report.infos.isEmpty()}" class="card">
+                    <div th:if="${report.infos}" class="card-body">
+                        <table>
+                            <tr th:each="infolist : ${report.getInfoTagsList()}">
+                                <th:block th:each="info : ${infolist}">
+                                    <h4 class="text-center" th:text="${info.tag}"></h4>
+                                    <p class="text-center" th:utext="${info.data}"></p>
+                                </th:block>
+                                <br>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <br th:if="${!report.attaches.isEmpty()}">
+                <div th:if="${!report.attaches.isEmpty()}" class="card">
+                    <div th:if="${report.attaches}" class="card-body">
+                        <h4 th:if="${report.attaches}" th:text="'Вложения'"></h4>
+                        <br th:if="${report.attaches}">
+
+                        <table>
+                            <tr th:each="attach : ${report.attaches}">
+                                <p class="text-center" th:text="${attach.tag}"></p>
+                                <a class="text-center" th:href="@{/attach/download(id=${attach.id})}"
+                                   th:text="${attach.getName()}"></a>
+                                <br>
+                                <br>
+                            </tr>
+                            <br>
+                        </table>
+                    </div>
+                </div>
+
+                <br th:if="${!report.runs.isEmpty()}">
+                <div th:if="${!report.runs.isEmpty()}" class="card">
+                    <div th:if="${report.runs}" class="card-body">
+                        <h4 th:if="${report.runs}" th:text="${'Список тестов'}"></h4>
+                        <br th:if="${report.runs}">
+
+                        <div th:if="${report.runs}">
+                            <table id="tablerun" class="RUNS table table-sm">
+                                <thead>
+                                <tr>
+                                    <th>Тест</th>
+                                    <th>Статус</th>
+                                    <th>Даты проведения</th>
+                                    <th>Ссылка</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr th:each="run : ${report.runs}">
+                                    <td><h5 th:text="${run.name}"></h5></td>
+                                    <td th:text="${run.status}"></td>
+                                    <td th:text="${df.format(run.time_start)+' - '+df.format(run.time_finish)}"></td>
+                                    <td><a class="btn btn-primary btn-sm" th:href="@{'/run_view?id=' + ${run.id}}">Открыть</a>
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+
+                            <!-- с ней красивее -->
+                            <script type="text/javascript">
+                                $(function () {
+                                    $('.RUNS.table.table-sm').bootstrapTable()
+                                })
+                            </script>
+
+                        </div>
+                    </div>
+                </div>
+                <br>
+            </div>
+
+
+        </div>git remote
+    </div>
+</div>
+
+
+</body>
+</html>

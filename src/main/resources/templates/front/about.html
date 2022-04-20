@@ -1,0 +1,66 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="front/fragments/header :: head">
+</head>
+
+<body>
+
+<!-- main menu -->
+<div th:replace="front/fragments/header :: main-menu"></div>
+<!-- /main menu -->
+
+<!-- Page Content -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            <h1 class="mt-5">О команде</h1>
+            <br>
+            <h6  th:text="${'Привет! '+@environment.getProperty('project.about')}" ></h6>
+            <h6>По всем вопросам администрирования сервиса просьба писать на почту.</h6>
+            <!-- <br>
+            <img width="400" height="266" th:src="@{images/cat.jpg}"/>
+            <br>-->
+            <br>
+            <h6>Администраторы</h6>
+            <table id="admins" class="table table-bordered" style="width: 100%">
+                <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Фамилия</th>
+                    <th>Почта</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="admin : ${admins}">
+                    <td th:if="${admin.isActive()}" th:text="${admin.firstName}"></td>
+                    <td th:if="${admin.isActive()}" th:text="${admin.lastName}"></td>
+                    <td th:if="${admin.isActive()}"><a th:text="${admin.email}" th:href="${'mailto:'+admin.email}"></a></td>
+                </tr>
+                </tbody>
+            </table>
+
+            <br>
+            <h6>Команда</h6>
+            <table id="users" class="table table-bordered" style="width: 100%">
+                <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Фамилия</th>
+                    <th>Почта</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:if="${user.isActive()}" th:text="${user.firstName}"></td>
+                    <td th:if="${user.isActive()}"th:text="${user.lastName}"></td>
+                    <td th:if="${user.isActive()}" ><a th:text="${user.email}" th:href="${'mailto:'+user.email}"></a></td>
+                </tr>
+                </tbody>
+            </table>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

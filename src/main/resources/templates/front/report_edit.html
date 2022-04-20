@@ -1,0 +1,651 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="front/fragments/header :: head">
+
+
+</head>
+
+
+<body data-spy="scroll" data-target="#toc">
+<script th:inline="javascript">
+    var minDate, maxDate;
+
+    // Custom filtering function which will search data in column four between two values
+    $.fn.dataTable.ext.search.push(
+        function (settings, data, dataIndex) {
+            var min = minDate.val();
+            var max = maxDate.val();
+            var date = new Date(data[3]);
+
+            if (
+                (min === null && max === null) ||
+                (min === null && date <= max) ||
+                (min <= date && max === null) ||
+                (min <= date && date <= max)
+            ) {
+                return true;
+            }
+            return false;
+        }
+    );
+    //YYYY-MM-DD
+    $(document).ready(function () {
+        // Create date inputs
+        minDate = new DateTime($('#min'), {
+            format: 'YYYY-MM-DD'
+        });
+        maxDate = new DateTime($('#max'), {
+            format: 'YYYY-MM-DD'
+        });
+
+        // DataTables initialisation
+        //var table = $('#table_id').DataTable();
+
+        // Refilter the table
+        /*$('#min, #max').on('change', function () {
+            table.draw();
+        });*/
+
+    });
+
+
+    //https://datatables.net/forums/discussion/56889/uncaught-typeerror-cannot-read-property-dt-rowid-of-undefined
+
+    $(document).ready(function () {
+        var system_idd = [(${report.system.id})];
+        var report_idd = [(${report.id})];
+        document.getElementById('min').value = moment().subtract(30, "days").format("YYYY-MM-DD");
+        document.getElementById('max').value = moment().add(1, 'days').format("YYYY-MM-DD");
+
+        var table = $('#table_id').DataTable(
+            {
+                //не трогать перенос символов на новые строки!!!!!
+                serverSide: true,
+                processing: true,
+                lengthMenu: [
+                    [10, 25, 50, 100, -1],
+                    [10, 25, 50, 100, "All"]
+                ],
+                async: true,
+                order: [
+                    [0, 'desc']
+                ],
+                columns: [
+                    {data: 'id', searchable: false, orderable: true},
+                    {data: 'title', searchable: true, orderable: true},
+                    {data: 'visible', searchable: false, orderable: true},
+                    {data: 'status', searchable: false, orderable: true},
+                    {data: 'start', searchable: false, orderable: true},
+                    {data: 'end', searchable: false, orderable: true},
+                    {
+                        data: "run_url",
+                        searchable: false,
+                        orderable: false,
+                        render: function (data, type, row, meta) {
+                            if (type === 'display') {
+                                data = '<a href="' + data + '">' + 'Посмотреть' + '</a>';
+                            }
+                            return data;
+                        }
+                    },
+                    {
+                        data: "report_add_run",
+                        searchable: false,
+                        orderable: false,
+                        render: function (data, type, row, meta) {
+                            if (type === 'display') {
+                                if (data != "") {
+                                    data = '<a href="' + data + '">' + 'Добавить' + '</a>';
+                                }
+
+                            }
+                            return data;
+                        }
+                    }
+                ],
+
+                ajax: {
+                    url: '/api/get/runs/json/list/report?system_id=' + system_idd + "&report_id=" + report_idd,
+                    data: function (d) {
+                        d.time_start = $('#min').val();
+                        d.time_end = $('#max').val();
+                    }
+
+                }
+
+            }
+        );
+
+
+        $('#min, #max').on('change', function () {
+            table.draw();
+        });
+
+    });
+</script>
+
+
+<!-- main menu -->
+<div th:replace="front/fragments/header :: main-menu"></div>
+<!-- /main menu -->
+<div id="outer-container"
+     style="display: table;
+            width: 100%;
+            height: 100%;">
+
+    <!-- side bar https://usefulangle.com/post/61/html-page-with-left-sidebar-main-content-with-css -->
+    <div
+            style="padding-top: 32px;
+            display: table-cell;
+            width: 15%;
+            vertical-align: top;">
+        <!-- table of content-->
+        <div id="sidebar" class="sidebar sticky-top" style="padding-top: 64px;">
+            <nav data-spy="affix">
+                <!-- html с кнопкой экранированный https://v3c.ru/soft/ekranirovanie-html -->
+                <div th:if="${msg}" th:utext="'<p>'+${msg} + '</p>'+ '&lt;button type=&quot;button&quot; class=&quot;close&quot; data-dismiss=&quot;alert&quot; aria-label=&quot;Close&quot;&gt;&lt;span aria-hidden=&quot;true&quot;&gt;&amp;times;&lt;/span&gt;&lt;/button&gt;'" class="alert alert-success alert-dismissible fade show" role="alert">
+                    <!--<strong>Привет!</strong>
+                    <p>Тест доступен на редактирование.</p>-->
+
+                </div>
+                <script type="text/javascript">
+                    $(document).ready(function () {
+                        $('.alert').alert();
+                    });
+                </script>
+                <a class="btn btn-primary btn-sm btn-block" role="button"
+                   th:href="@{/system_view(id=${report.system.id})}">К календарю</a>
+                <br>
+                <a class="btn btn-primary btn-sm btn-block" role="button" th:href="@{/reports(id=${report.system.id})}">К
+                    списку
+                    отчётов</a>
+                <br>
+                <a class="btn btn-success btn-sm btn-block" role="button" th:href="@{/report_view(id=${report.id})}">Открыть
+                    на
+                    просмотр</a>
+                <br>
+            </nav>
+        </div>
+    </div>
+
+
+    <!--разные функции отображения
+<p th:about="${run.isVisible()} ? 'Этот запуск видим' : 'Этот запуск скрыт'"></p>
+<div th:switch="${run.isVisible()}">
+</div>-->
+    <!-- проверка на наличие элементов в листе<div th:if="${not #lists.isEmpty(attaches)}">-->
+
+    <!-- Page Content -->
+    <div id="content" class="container"
+         style="display: table-cell;
+            width: 85%;
+            vertical-align: top;">
+        <div class="row">
+
+            <div class="col-lg-12 text-center">
+                <br>
+
+                <div id="accordion_00">
+                    <div class="card">
+                        <div class="card-header" id="heading_00">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse_00"
+                                        aria-expanded="false" aria-controls="collapse_00">
+                                    Редактировать основные настройки отчёта
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapse_00" class="collapse" aria-labelledby="heading_00"
+                             data-parent="#accordion">
+                            <div class="card-body">
+                                <!--рабочая форма сохранения статуса и видимости-->
+                                <!------------------------------------------------------->
+                                <form class="card p-3 bg-light" action="#savestatus" th:action="@{/report/save}"
+                                      th:object="${report}" method="post"
+                                      enctype="multipart/form-data">
+                                    <input type="hidden" th:field="*{id}"/>
+                                    <br>
+                                    <div class="form-row">
+                                        <br>
+                                        <div class="form-group col-md-12">
+                                            <small id="name" class="form-text text-muted">Название отчёта</small>
+                                            <input type="text" class="form-control form-control-sm"
+                                                   th:field="*{name}"></input>
+                                        </div>
+
+                                        <div class="form-group col-md-12">
+                                            <small id="date_created" class="form-text text-muted">Дата отчёта
+                                            </small>
+                                            <input type="date" class="form-control form-control-sm"
+                                                   th:field="*{{date_created}}"></input>
+                                        </div>
+
+
+                                        <div class="form-group col-md-12">
+                                            <small id="status" class="form-text text-muted">Статус отчёта</small>
+                                            <input th:list="statuses" class="form-control form-control-sm"
+                                                   th:field="*{status}">
+                                            <datalist id="statuses">
+                                                <option th:value="'Создан'" th:text="'Создан'"></option>
+                                                <option th:value="'Склонирован'" th:text="'Склонирован'"></option>
+                                                <option th:value="'Успешно'" th:text="'Успешно'"></option>
+                                                <option th:value="'Успешно c ограничениями'"
+                                                        th:text="'Успешно c ограничениями'"></option>
+                                                <option th:value="'Неуспешно'" th:text="'Неуспешно'"></option>
+                                                <option th:value="'Надо разбираться'"
+                                                        th:text="'Надо разбираться'"></option>
+                                                <option th:value="'Есть дефект'" th:text="'Есть дефект'"></option>
+                                                <option th:value="'Нужен ретест'" th:text="'Нужен ретест'"></option>
+                                            </datalist>
+                                            </input>
+                                        </div>
+                                        <div class="form-group col-md-12">
+                                            <small id="vis" class="form-text text-muted">Видимость отчёта</small>
+                                            <select class="form-control form-control-sm" th:field="*{visible}">
+                                                <option th:value="'true'" th:text="true"></option>
+                                                <option th:value="'false'" th:text="false"></option>
+                                            </select>
+                                        </div>
+
+                                        <!--сейчас автовыбор
+                                        <div class="form-group col-md-12">
+                                            <small id="author" class="form-text text-muted">Автор</small>
+                                            <select class="form-control form-control-sm" th:name="userID"
+                                                    th:value="*{user.id}">
+                                                <option th:each="userr : ${users}"
+                                                        th:value="${userr.id}"
+                                                        th:text="${userr.firstName} +' '+ ${userr.lastName} + ' '+ ${userr.email}"
+                                                        th:selected="(${userr.id} == *{user.id})">
+                                                </option>
+                                            </select>
+                                        </div>-->
+
+                                        <div class="form-group col-md-12">
+                                            <input type="submit" class="btn btn-primary center-block btn-sm"
+                                                   th:value="Сохранить"
+                                                   name="action"/>
+                                        </div>
+                                    </div>
+                                </form>
+                                <!------------------------------------------------------->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <div id="accordion_0">
+                    <div class="card">
+                        <div class="card-header" id="heading_0">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse_0"
+                                        aria-expanded="false" aria-controls="collapse_0">
+                                    Редактировать информацию отчёта
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapse_0" class="collapse" aria-labelledby="heading_0"
+                             data-parent="#accordion">
+                            <div class="card-body">
+                                <!--редактирование информации-->
+                                <!------------------------------------------------------->
+                                <th:block th:each="tag: ${report.getUniqueInfoTags()}">
+                                    <th:block th:each="info : ${report.infos}" th:if="${tag} == ${info.tag}">
+                                        <form class="card p-3 bg-light" id="summeditt0" action="#saveinfo"
+                                              th:action="@{/info/save/}"
+                                              method="post">
+                                            <input th:name="id" type="hidden" th:value="*{report.id}"/>
+                                            <input th:name="type" type="hidden" th:value="'report_edit'"/>
+                                            <input th:name="infoId" type="hidden" th:value="*{info.id}"/>
+                                            <small class="form-text text-muted">Тег информации
+                                            </small>
+                                            <input style="border: 1px solid #ced4da;" th:name="tag" type="text"
+                                                   class="form-control-sm"
+                                                   th:value="*{info.tag}"/>
+                                            <br>
+                                            <textarea th:name="infoInput" type="text" rows="4"
+                                                      th:text="*{info.data}"
+                                                      th:id="'summedit' + ${info.id}" placeholder="Content"
+                                                      class="form-control summer"
+                                                      autocomplete="off"></textarea>
+                                            <div class="form-group col-md-12">
+                                                <input type="submit" class="btn btn-primary center-block btn-sm"
+                                                       th:value="Сохранить"
+                                                       name="action"/>
+                                                <input class="btn btn-warning center-block btn-sm"
+                                                       type="submit"
+                                                       name="action"
+                                                       value="delete"
+                                                       id="id_info_deleter"
+                                                       th:formaction="@{/info/delete/}"
+
+                                                       onclick="javascript:document.getElementById('id_info_deleter');return confirm('Точно хотите удалить эту информацию?');"
+                                                       th:value="Удалить"/>
+                                            </div>
+                                        </form>
+                                        <br>
+                                    </th:block>
+                                </th:block>
+                                <br>
+
+                                <form class="card p-3 bg-light" action="#addinfo" th:action="@{/info/add}"
+                                      method="post">
+                                    <span>Добавить описание</span>
+                                    <input th:name="id" type="hidden" th:value="*{report.id}"/>
+                                    <input th:name="type" type="hidden" th:value="'report_edit'"/>
+                                    <small class="form-text text-muted">Тег информации</small>
+                                    <input style="border: 1px solid #ced4da;" th:name="tag" type="text"
+                                           class="form-control-sm"/>
+                                    <br>
+                                    <textarea th:name="infoInput" type="text" rows="4"
+                                              placeholder="Описание отчёта" class="form-control"
+                                              autocomplete="off"></textarea>
+                                    <div class="form-group col-md-12">
+                                        <input type="submit" class="btn btn-success center-block btn-sm"
+                                               th:value="Добавить"
+                                               name="add"/>
+                                    </div>
+                                </form>
+
+                                <script>
+                                    $('.form-control.summer').summernote({
+                                        height: 200
+                                    });
+                                </script>
+                                <!------------------------------------------------------->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <div id="accordion_1">
+                    <div class="card">
+                        <div class="card-header" id="heading_1">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse_1"
+                                        aria-expanded="false" aria-controls="collapse_1">
+                                    Редактировать вложения
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapse_1" class="collapse" aria-labelledby="heading_1"
+                             data-parent="#accordion">
+                            <div class="card-body">
+                                <!------------------------------------------------------->
+                                <!--удаление вложений-->
+                                <div th:if="${not #lists.isEmpty(report.attaches)}">
+                                    <th:block th:each="attach: ${report.attaches}">
+                                        <form class="card p-3 bg-light" action="update"
+                                              th:action="@{/attach/update}"
+                                              th:object="${attach}" method="post">
+                                            <!--<input th:about="id" type="hidden" th:value="*{run.id}"/>-->
+                                            <input th:name="id" type="hidden" th:value="${report.id}"/>
+                                            <input th:name="type" type="hidden" th:value="'report_edit'"/>
+                                            <input th:name="attach_id" type="hidden" th:value="${attach.id}"/>
+                                            <span>Имя файла</span>
+                                            <input type="text" class="form-control form-control-sm" th:name="${'name'}" th:value="${attach.name}"></input>
+                                            <br>
+
+                                            <span>Тег вложения</span>
+                                            <input type="text" class="form-control form-control-sm" th:name="${'tag'}" th:value="${attach.tag}"></input>
+                                            <br>
+                                            <!--<div class="form-group col-md-12">
+                                                <input class="btn btn-warning center-block btn-sm" type="submit"
+                                                       th:value="Удалить"/>
+                                            </div>-->
+
+                                            <div class="form-group col-md-12">
+
+                                                <input class="btn btn-primary center-block btn-sm"
+                                                       type="submit"
+                                                       name="attach_action"
+                                                       value="update"
+                                                       th:value="Обновить"/>
+
+
+                                                <input class="btn btn-warning center-block btn-sm"
+                                                       type="submit"
+                                                       name="attach_action"
+                                                       value="delete"
+                                                       id="id_attach_deleter"
+                                                       th:formaction="@{/attach/delete}"
+                                                       onclick="javascript:document.getElementById('id_attach_deleter');return confirm('Точно хотите удалить этот файл?');"
+                                                       th:value="Удалить"/>
+
+                                            </div>
+                                        </form>
+                                        <br>
+                                    </th:block>
+                                </div>
+
+                                <!--загрузка вложений-->
+                                <form class="card p-3 bg-light" action="upload" th:action="@{/attach/upload}"
+                                      method="post"
+                                      enctype="multipart/form-data">
+                                    <span>Загрузить новый файл</span>
+                                    <input th:name="id" type="hidden" th:value="${report.id}"/>
+                                    <input th:name="type" type="hidden" th:value="'report_edit'"/>
+                                    <small class="form-text text-muted">Тег вложения
+                                    </small>
+                                    <input type="text" class="form-control form-control-sm"
+                                           th:name="tag"></input>
+                                    <input th:name="data" type="file" class="form-control-file"/>
+                                    <div class="form-group col-md-12">
+                                        <input class="btn btn-success center-block btn-sm" type="submit"
+                                               th:value="Загрузить"/>
+                                    </div>
+                                </form>
+                                <!------------------------------------------------------->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <div id="accordion_3">
+                    <div class="card">
+                        <div class="card-header" id="heading_3">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse_3"
+                                        aria-expanded="false" aria-controls="collapse_3">
+                                    Добавить тесты
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapse_3" class="collapse" aria-labelledby="heading_3"
+                             data-parent="#accordion">
+                            <div class="card-body">
+                                <!------------------------------------------------------->
+                                <!--привязка тестов -->
+                                <!--<div class="row">
+                                    <div class="col col-md-12">-->
+
+                                <!--<h4 id="c1" th:text="'Список тестов'"></h4>-->
+                                <table border="0" cellspacing="5" cellpadding="5">
+                                    <tbody>
+                                    <tr>
+                                        <td>Минимальная дата поиска:</td>
+                                        <td><input type="text" id="min" name="min"></td>
+                                    </tr>
+                                    <tr>
+                                        <td>Максимальная дата поиска:</td>
+                                        <td><input type="text" id="max" name="max"></td>
+                                    </tr>
+                                    </tbody>
+                                </table>
+
+                                <table id="table_id" class="display" style="width: 100%">
+                                    <thead>
+                                    <tr>
+                                        <th>Id</th>
+                                        <th>Название</th>
+                                        <th>Видимость</th>
+                                        <th>Статус</th>
+                                        <th>Начало</th>
+                                        <th>Конец</th>
+                                        <th>Ссылка на тест</th>
+                                        <th>Добавить в отчёт</th>
+                                    </tr>
+                                    </thead>
+                                </table>
+                                <br>
+
+                                <!--</div>
+                                </div>-->
+                                <!------------------------------------------------------->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br>
+
+                <div th:if="${!report.runs.isEmpty()}" id="accordion_2">
+                    <div class="card">
+                        <div class="card-header" id="heading_2">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapse_2"
+                                        aria-expanded="false" aria-controls="collapse_2">
+                                    Отвязать тесты
+                                </button>
+                            </h5>
+                        </div>
+                        <div id="collapse_2" class="collapse" aria-labelledby="heading_2"
+                             data-parent="#accordion">
+                            <div class="card-body">
+                                <!------------------------------------------------------->
+                                <!--отвязка тестов тестов-->
+                                <th:block th:each="run : ${report.runs}">
+                                    <div class="row">
+                                        <div class="col col-md-12">
+                                            <form class="card p-3 bg-light" action="#unattach"
+                                                  th:action="@{/report/run/remove}"
+                                                  method="post">
+                                                <div class="row">
+                                                    <div class="col"><span>Имя теста</span><input
+                                                            type="text"
+                                                            style="text-align:center;"
+                                                            class="form-control form-control-sm"
+                                                            th:readonly="true"
+                                                            th:value="${run.name}"/>
+                                                    </div>
+                                                </div>
+
+                                                <div class="row">
+                                                    <input th:name="run_id" type="hidden"
+                                                           th:readonly="true"
+                                                           th:value="${run.id}"/>
+                                                    <input th:name="id" type="hidden"
+                                                           th:readonly="true"
+                                                           th:value="${report.id}"/>
+
+                                                    <div class="col"><span>Статус</span><input
+                                                            type="text"
+                                                            style="text-align:center;"
+                                                            class="form-control form-control-sm"
+                                                            th:readonly="true"
+                                                            th:value="${run.status}"/>
+                                                    </div>
+
+                                                    <div class="col"><span>Время старта</span><input
+                                                            type="text"
+                                                            style="text-align:center;"
+                                                            class="form-control form-control-sm"
+                                                            th:readonly="true"
+                                                            th:value="${dft.format(run.time_start)}"/>
+                                                    </div>
+                                                    <div class="col"><span>Время остановки</span><input
+                                                            type="text"
+                                                            style="text-align:center;"
+                                                            class="form-control form-control-sm"
+                                                            th:readonly="true"
+                                                            th:value="${dft.format(run.time_finish)}"/>
+                                                    </div>
+
+                                                        <div class="col">
+                                                            <a class="btn btn-primary center-block btn-sm btn-block"
+                                                               th:href="@{'/run_view?id=' + ${run.id}}">Открыть</a>
+
+                                                            <input class="btn btn-warning center-block btn-sm btn-block"
+                                                                   type="submit"
+                                                                   name="stat_action"
+                                                                   value="delete"
+                                                                   id="id_stat_deleter"
+                                                                   th:formaction="@{/report/run/remove}"
+
+                                                                   onclick="javascript:document.getElementById('id_stat_deleter');return confirm('Точно хотите отвязать этот тест?');"
+                                                                   th:value="Отвязать"/>
+
+                                                    </div>
+                                                </div>
+                                            </form>
+                                        </div>
+
+                                    </div>
+                                    <br>
+
+                                </th:block>
+
+                                <!------------------------------------------------------->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <br th:if="${!report.runs.isEmpty()}">
+
+
+
+                <div id="accordion_delete">
+                    <div class="card">
+                        <div class="card-header" id="headingOne">
+                            <h5 class="mb-0">
+                                <button class="btn btn-link" data-toggle="collapse" data-target="#collapseOne"
+                                        aria-expanded="false" aria-controls="collapseOne">
+                                    Удалить отчёт
+                                </button>
+                            </h5>
+                        </div>
+
+                        <div id="collapseOne" class="collapse" aria-labelledby="headingOne"
+                             data-parent="#accordion">
+                            <div class="card-body">
+                                <!-- Ты чё пёс?-->
+                                <!------------------------------------------------------->
+                                <form action="#deleterun" th:action="@{/report/delete/}"
+                                      th:object="${report}" method="post"
+                                      onSubmit="return check();">
+                                    <input type="hidden" th:field="*{id}"/>
+                                    <input type="hidden" th:field="*{system.id}"/>
+                                    <small class="form-text text-muted">Напишите УДАЛИТЬ или УДАЛИТЬ С ТЕСТАМИ</small>
+                                    <input type="text" class="form-control form-control-sm" id="deleter"
+                                           name="question" autocomplete="off">
+                                    <div class="form-group col-md-12">
+                                        <input type="submit" class="btn btn-primary center-block "
+                                               th:value="Удалить"
+                                               name="action"/>
+                                    </div>
+                                </form>
+                                <!------------------------------------------------------->
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+                <script type="text/javascript">
+                    function check() {
+                        var searchtext = document.getElementById("deleter").value;
+                        if ((searchtext != 'УДАЛИТЬ') && (searchtext != 'УДАЛИТЬ С ТЕСТАМИ')) {
+                            alert('Подтвердите удаление');
+                            return false;
+                        }
+                    }
+                </script>
+
+
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

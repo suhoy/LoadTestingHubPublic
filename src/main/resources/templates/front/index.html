@@ -1,0 +1,30 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="front/fragments/header :: head">
+</head>
+
+<body>
+
+<!-- main menu -->
+<div th:replace="front/fragments/header :: main-menu"></div>
+<!-- /main menu -->
+
+<!-- Page Content -->
+<div class="container">
+    <div class="row">
+        <div class="col-lg-12 text-center">
+            <!--<h1 class="mt-5" th:utext="${pageTexts.get('systems')}"></h1>-->
+            <h1 class="mt-5" th:text="'Тестируемые системы'"></h1>
+            <br>
+            <div th:each="system : ${systems}" class="card-columns">
+                <div class="card-body">
+                <a class="card bg-primary text-white text-center p-3" th:href="@{/system_view(id=${system.id})}" th:text="${system.name}"
+                   role="button"></a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

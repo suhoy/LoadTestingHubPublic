@@ -1,0 +1,98 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="front/fragments/header :: head">
+
+
+</head>
+
+<body>
+
+<!-- main menu -->
+<div th:replace="front/fragments/header :: main-menu"></div>
+<!-- /main menu -->
+
+
+<style>
+    .fc-sat {
+        color: #ff92a0;
+    }
+
+    .fc-sun {
+        color: #ff92a0;
+    }
+</style>
+
+<!-- Page Content -->
+<div class="container">
+    <div class="row">
+
+
+        <div class="col-lg-12 text-center">
+
+            <h1 class="mt-5" th:text="'Админка'"></h1>
+            <br>
+            <div class="alert alert-danger alert-dismissible" role="alert" th:if="${err}" th:text="${err}"/>
+            <div class="alert alert-success alert-dismissible" role="alert" th:if="${succ}" th:text="${succ}"/>
+
+            <table id="admins" class="table table-bordered" style="width: 100%">
+                <thead>
+                <tr>
+                    <th>Имя</th>
+                    <th>Фамилия</th>
+                    <th>Почта</th>
+                    <th>Права</th>
+                    <th>Active</th>
+                    <th>Дать</th>
+                    <th>Отобрать</th>
+                    <th>Сбросить</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${users}">
+                    <td th:text="${user.firstName}"></td>
+                    <td th:text="${user.lastName}"></td>
+                    <td><a th:text="${user.email}" th:href="${'mailto:'+user.email}"></a></td>
+                    <td>
+                        <section th:each="role : ${user.getRoles()}">
+                            <span class="badge badge-light" th:text="${role.role.toString()}"></span>
+                        </section>
+                    </td>
+                    <td>
+                        <span class="badge badge-light" th:text="${user.isActive()}"></span>
+                    </td>
+                    <td>
+                        <section th:each="role : ${roles}">
+                            <a th:href="${'/admin/add?user_id='+user.id + '&role_id='+role.id}"
+                               th:text="${'Дать '+role.role.toString()}" class="btn btn-success btn-sm"
+                               role="button"></a>
+                            <p>
+                        </section>
+                    </td>
+                    <td>
+                        <section th:each="role : ${roles}">
+                            <a th:href="${'/admin/remove?user_id='+user.id + '&role_id='+role.id}"
+                               th:text="${'Отобрать '+role.role.toString()}" class="btn btn-warning btn-sm"
+                               role="button"></a>
+                            <p>
+                        </section>
+                    </td>
+                    <td><a th:href="${'/admin/reset/password?user_id='+user.id}" th:text="${'Сбросить пароль'}"
+                           class="btn btn-dark btn-sm" role="button"></a>
+                        <br>
+                        <br>
+                            <a th:href="${'/admin/change/active?user_id='+user.id}" th:text="${'Изменить Active'}"
+                               class="btn btn-dark btn-sm" role="button"></a>
+                        <br>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+
+
+        </div>
+    </div>
+</div>
+
+
+</body>
+</html>

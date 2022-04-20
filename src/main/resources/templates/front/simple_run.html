@@ -1,0 +1,297 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <!-- jQuery 3.5.1, 3.3.1, 3.2.0-->
+
+    <!-- Bootstrap 4.0.0 , 4.1.3, 4.2.1,  -->
+    <link th:href="${baseUrl + '/libs/bootstrap.min.css'}" rel="stylesheet"/>
+
+    <!-- filter table-->
+    <link th:href="${baseUrl + '/libs/jquery.datatables.min.css'}" rel="stylesheet"/>
+
+    <link th:href="${baseUrl + '/libs/datatables.datetime.min.css'}" rel="stylesheet"/>
+
+    <!-- table of content-->
+    <link th:href="${baseUrl + '/libs/bootstrap-toc.min.css'}" rel="stylesheet"/>
+
+    <!-- group table-->
+    <link th:href="${baseUrl + '/libs/bootstrap-table.min.css'}" rel="stylesheet">
+
+    <link th:href="${baseUrl + '/libs/bootstrap-table-group-by.css'}" rel="stylesheet">
+
+    <!-- include full calendar 3.10.2 css/js -->
+    <link th:href="${baseUrl + '/libs/fullcalendar.min.css'}" rel="stylesheet">
+
+    <!-- 0.8.18-->
+    <link th:href="${baseUrl + '/libs/summernote-bs4.min.css'}" rel="stylesheet">
+
+
+    <link th:href="${baseUrl + '/libs/decaf.min.css'}" rel="stylesheet"/>
+
+
+    <style>
+        @page {
+            @bottom-right {
+                /*color: red;*/
+                content: "Страница " counter(page) " из " counter(pages);
+            }
+        }
+    </style>
+
+
+</head>
+<div class="col-lg-12 text-center">
+
+
+    <table th:style="'width:100%;'">
+
+
+        <tbody>
+        <tr>
+            <td th:style="'width:65%; align:left; text-align:left;'">
+                <br>
+                <br>
+                <span>Система: </span><span th:text="${run.system.name}"></span>
+                <br>
+                <span>Время теста: </span>
+                <span th:text="${dft.format(run.time_start)}+ ' - ' + ${dft.format(run.time_finish)}"></span>
+
+                <br th:if="${run.report}">
+                <span th:if="${run.report}" th:text="'Тест включён в: '"></span><a th:if="${run.report}"
+                                                                                   th:href="${baseUrl + '/report_view?id='+run.report.id}"
+                                                                                   th:text="${run.report.name}"></a>
+                <br>
+                <span>Статус: </span>
+                <span th:text="${run.status}"></span>
+
+                <br>
+                <span>Автор: </span><a th:if="${run.user}" th:href="${'mailto:' + run.user.getEmail()}"
+                                       th:text="${run.user.getFirstName() + ' ' + run.user.getLastName()}"></a>
+
+            </td>
+            <td th:style="'width:35%; text-align:right;'"><img width="100" height="100" class="mt-5"
+                                                               th:src="${baseUrl + '/images/pdf_logo.png'}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+    <br>
+    <br>
+
+    <h3><a class="text-center" th:href="${baseUrl + '/run_view?id='+run.id}" th:text="${run.name}"></a></h3>
+    <br>
+    <div style="page-break-before:always">&nbsp;</div>
+
+
+    <!--<br th:if="${run.infos.size()>0}">
+    <br th:if="${run.infos.size()>0}">
+    <h4 th:text="${run.infos.size()>0?'Информация':''}"></h4>-->
+
+
+    <!--toc-->
+
+    <h4 th:text="${'Оглавление'}"></h4>
+    <div th:style="'align:left; text-align:left;'" id="TOC_SIMPLE_RUN">
+
+    </div>
+
+
+    <div style="page-break-before:always">&nbsp;</div>
+    <!--toc-->
+
+
+    <br th:if="${!run.infos.isEmpty()}">
+    <table>
+        <tr th:each="infolist : ${run.getInfoTagsList()}">
+            <th:block th:each="info : ${infolist}">
+                <h4 th:attr="data-toc=${info.tag}" class="text-center" th:text="${info.tag}"></h4>
+                <span class="text-center" th:utext="${info.data}"></span>
+                <br>
+                <br>
+            </th:block>
+
+        </tr>
+    </table>
+
+
+    <!-- download file https://www.callicoder.com/spring-boot-file-upload-download-jpa-hibernate-mysql-database-example/-->
+    <br th:if="${!run.attaches.isEmpty()}">
+    <h4 th:attr="data-toc=${'Вложения'}" th:if="${!run.attaches.isEmpty()}" th:text="${'Вложения'}"></h4>
+    <br th:if="${!run.attaches.isEmpty()}">
+
+    <table>
+        <tr th:each="attach : ${run.attaches}">
+            <p class="text-center" th:text="${attach.tag}"></p>
+            <small class="form-text text-muted">(Файл доступен по ссылке и во вложениях PDF документа)</small>
+            <br>
+            <a class="text-center" th:href="${baseUrl +'/attach/download?id='+attach.id}"
+               th:text="${attach.getName()}"></a>
+            <br>
+        </tr>
+        <br>
+    </table>
+
+
+    <div th:if="${!run.period_stats.isEmpty()}" style="page-break-before:always">&nbsp;</div>
+    <h4 th:attr="data-toc=${'Статистика'}" th:if="${!run.period_stats.isEmpty()}" th:text="${'Статистика'}"></h4>
+    <br th:if="${!run.period_stats.isEmpty()}">
+
+
+    <th:block th:each="period : ${run.period_stats}">
+
+        <!--style="font-weight: bold"-->
+        <p class="text-center" th:if="${!period?.about.isEmpty()}" th:text="${period?.about}"></p>
+        <table style="font-size:x-small" th:if="${!period?.stats.isEmpty()}" class="SLA table table-sm">
+            <thead>
+            <tr>
+                <th colspan="1" ><p style="font-weight: bold" class="text-center" th:text="${period?.getProfile()+'%'}"></th>
+                <th colspan="1" ><p style="font-weight: bold" class="text-center" th:text="${period?.getTps()+' tps'}"></th>
+                <th colspan="4" ><p style="font-weight: bold" class="text-center" th:text="${period?.time_start?.format(df)}+ ' - ' + ${period?.time_finish?.format(df)}"></th>
+                <th:block th:each="stat_time,i: ${period?.stats?.get(0).getStat_time()}">
+                    <th th:if="${period.ThereIsAFailTime()}" colspan="2"><p th:style="${'font-weight: bold'}" th:class="${'text-center'}" th:text="${stat_time.getTag()}"></p></th>
+                    <th th:if="${!period.ThereIsAFailTime()}" colspan="1"><p th:style="${'font-weight: bold'}" th:class="${'text-center'}" th:text="${stat_time.getTag()}"></p></th>
+                </th:block>
+            </tr>
+            <tr>
+                <th>Operation</th>
+                <th>Profile</th>
+                <th>%</th>
+                <th>Pass</th>
+                <th>Fail</th>
+                <th>SLA</th>
+                <!--<th:block th:each="stat_time : ${period.stats.get(0).getStat_time()}">-->
+                <th:block th:each="times : ${period.getMaxTimes()}">
+                    <th>Pass Time</th>
+                    <th th:if="${period.ThereIsAFailTime()}" >Fail Time</th>
+                </th:block>
+            </tr>
+            </thead>
+            <tbody>
+            <th:block th:each="stat, i: ${period.getOnlyParents()}">
+                <tr>
+                    <td th:text="${stat.script}"></td>
+                    <td th:text="${stat.profile}"></td>
+                    <td th:text="${#numbers.formatDecimal(((stat.pass_count+stat.fail_count) * 100.0 / stat.profile),1, 2)}"
+                        th:style="${(stat.pass_count + stat.fail_count) >= (stat.profile * 0.9) ? 'color:green' : 'color:red'}"></td>
+                    <td th:style="${(stat.pass_count) >= (stat.profile * 0.9) ? 'color:green' : 'color:red'}"
+                        th:text="${stat.pass_count}"></td>
+                    <td th:style="${stat.fail_count >= (stat.pass_count*0.05) ? 'color:red' : 'color:green'}"
+                        th:text="${stat.fail_count}"></td>
+                    <td th:text="${#numbers.formatDecimal(stat.sla,1,2)}"></td>
+                    <th:block th:each="statlist,i: ${stat.getStat_time()}">
+                        <!--<td th:text="${stat.getStat_time().get((i.index)).sla}"></td>-->
+                        <td th:style="${stat.getStat_time().get(i.index).pass_time <= stat.sla? 'color:green' : 'color:red'}"
+                            th:text="${#numbers.formatDecimal(stat.getStat_time().get(i.index).pass_time,1,2)}"></td>
+                        <td th:if="${period.ThereIsAFailTime()}" th:text="${#numbers.formatDecimal(stat.getStat_time().get(i.index).fail_time,1,2)}"></td>
+                    </th:block>
+                </tr>
+                <th:block th:if="${stat.getChild_list().size()>0}" th:each="child, i: ${stat.getChild_list()}">
+                    <tr>
+                        <td th:style="${'font-weight: lighter'}" th:text="${child.script}"></td>
+                        <td th:text="${child.profile}"></td>
+                        <td th:text="${#numbers.formatDecimal(((child.pass_count+child.fail_count) * 100.0 / child.profile),1, 2)}"
+                            th:style="${(child.pass_count + child.fail_count) >= (child.profile * 0.9) ? 'color:green' : 'color:red'}"></td>
+                        <td th:style="${(child.pass_count) >= (child.profile * 0.9) ? 'color:green' : 'color:red'}"
+                            th:text="${child.pass_count}"></td>
+                        <td th:style="${child.fail_count >= (child.pass_count*0.05) ? 'color:red' : 'color:green'}"
+                            th:text="${child.fail_count}"></td>
+                        <td th:text="${child.sla}"></td>
+                        <th:block th:each="statlist,i: ${child.getStat_time()}">
+                            <!--<td th:text="${child.getStat_time().get((i.index)).sla}"></td>-->
+                            <td th:style="${child.getStat_time().get(i.index).pass_time <= child.sla? 'color:green' : 'color:red'}"
+                                th:text="${#numbers.formatDecimal(child.getStat_time().get(i.index).pass_time,1,2)}"></td>
+                            <td th:if="${period.ThereIsAFailTime()}" th:text="${#numbers.formatDecimal(child.getStat_time().get(i.index).fail_time,1,2)}"></td>
+                        </th:block>
+                    </tr>
+                </th:block>
+            </th:block>
+            <tr>
+                <td th:style="${'font-weight: bold'}" th:text="${'Sum'}"></td>
+                <td th:text="${#numbers.formatDecimal(period.getSumProfileRealRercent()[0],1, 0) }"></td>
+                <td th:text="${ #numbers.formatDecimal(period.getSumProfileRealRercent()[2],1, 2)}"  th:style="${(period.getSumProfileRealRercent()[2]>90.0) ? 'color:green' : 'color:red'}"></td>
+                <td colspan="2" th:text="${ #numbers.formatDecimal(period.getSumProfileRealRercent()[1],1, 0) }" th:style="${(period.getSumProfileRealRercent()[2]>90.0) ? 'color:green' : 'color:red'}" ></td>
+                <td th:text="${ #numbers.formatDecimal(period.weightedAverage().get(0)[0],1,2) }"></td>
+                <th:block th:each="time, i: ${period.weightedAverage()}">
+                    <!--<td th:text="${ #numbers.formatDecimal(time[0],1, 2) }"></td>-->
+                    <td th:text="${ #numbers.formatDecimal(time[1],1, 2) }" th:style="${(time[1]<=time[0]) ? 'color:green' : 'color:red'}" ></td>
+                    <td th:if="${period.ThereIsAFailTime()}" th:text="${ #numbers.formatDecimal(time[2],1, 2) }"></td>
+                </th:block>
+            </tr>
+            </tbody>
+        </table>
+
+        <br>
+        <br>
+    </th:block>
+
+
+    <!--
+        <div th:if="${!run.stats.isEmpty()}" style="page-break-before:always">&nbsp;</div>
+        <h4 th:attr="data-toc=${'Статистика'}" th:if="${!run.stats.isEmpty()}" th:text="${'Статистика'}"></h4>
+        <br th:if="${!run.stats.isEmpty()}">
+
+        <th:block th:each="statlist : ${run.uniqueStatTagsList}">
+            <span class="text-center" th:text="${statlist.get(0).tag}"></span>
+            <table class="SLA table table-sm">
+                <thead>
+                <tr>
+                    <th>Operation</th>
+                    <th>SLA</th>
+                    <th>Profile</th>
+                    <th>%</th>
+                    <th th:if="${run.isTherePassCount()==true}">Pass</th>
+                    <th th:if="${run.isThereFailCount()==true}">Fail</th>
+                    <th th:if="${run.isTherePassTime()==true}">Pass time</th>
+                    <th th:if="${run.isThereFailTime()==true}">Fail time</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="stat : ${statlist}">
+                    <td th:text="${stat.script}"></td>
+                    <td th:text="${stat.sla}"></td>
+                    <td th:text="${stat.profile}"></td>
+                    <td th:text="${#numbers.formatDecimal(((stat.pass_count+stat.fail_count) * 100.0 / stat.profile),1, 2)}"
+                        th:style="${(stat.pass_count + stat.fail_count) >= (stat.profile * 0.9) ? 'color:green' : 'color:red'}"></td>
+                    <td th:if="${run.isTherePassCount()==true}"
+                        th:style="${(stat.pass_count) >= (stat.profile * 0.9) ? 'color:green' : 'color:red'}"
+                        th:text="${stat.pass_count}"></td>
+                    <td th:if="${run.isThereFailCount()==true}"
+                        th:style="${stat.fail_count >= (stat.pass_count*0.05) ? 'color:red' : 'color:green'}"
+                        th:text="${stat.fail_count}"></td>
+                    <td th:if="${run.isTherePassTime()==true}"
+                        th:style="${stat.pass_time <= stat.sla? 'color:green' : 'color:red'}"
+                        th:text="${stat.pass_time}"></td>
+                    <td th:if="${run.isThereFailTime()==true}" th:text="${stat.fail_time}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <br>
+            <br>
+        </th:block>
+    -->
+
+    <div th:if="${!run.graphs.isEmpty()}" style="page-break-before:always">&nbsp;</div>
+    <h4 th:attr="data-toc=${'Графики'}" th:if="${!run.graphs.isEmpty()}" th:text="${'Графики'}"></h4>
+    <tr th:each="ugraphs,outIter : ${run.uniqueGraphTagsList}">
+        <h5 th:attr="data-toc=${'  '+ugraphs.get(0).tag}" class="text-center" th:text="${ugraphs.get(0).tag}"></h5>
+        <th:block th:each="graph,inIter : ${ugraphs}">
+            <img style="width:720px;height:360px;"
+                 th:src="@{'data:'+${graph.type}+';base64,'+${graph.generateBase64Image()}}"
+                 alt="not found"/>
+            <p th:text="${graph.about}"></p>
+
+            <!--<span th:text="${'inIter.index='+inIter.index}"></span>
+            <span th:text="${'ugraphs.size-1='+(ugraphs.size()-1)}"></span>-->
+            <div th:style="${((inIter.even)&&(inIter.index!=(ugraphs.size()-1)))?'page-break-before:always':'' } ">
+                &nbsp;
+            </div>
+        </th:block>
+        <div th:style="${(outIter.index!=(run.getUniqueGraphTagsListSize()-1))?'page-break-before:always':'' } ">
+            &nbsp;
+        </div>
+    </tr>
+
+</div>
+
+</body>
+</html>

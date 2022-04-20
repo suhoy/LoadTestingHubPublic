@@ -1,0 +1,82 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head th:replace="front/fragments/header :: head">
+
+
+</head>
+
+<!-- main menu -->
+<div th:replace="front/fragments/header :: main-menu"></div>
+<!-- /main menu -->
+
+<body>
+<div class="container">
+
+
+    <div class="row">
+
+        <div class="col-lg-12 text-center">
+            <br>
+            <form class="form-horizontal" th:action="@{/login}" method="post">
+                <fieldset>
+
+                    <!-- Form Name -->
+                    <legend>Войти</legend>
+
+                    <div class="alert alert-success alert-dismissible" role="alert" th:if="${succ_profile}" th:text="${succ_profile}"/>
+                    <div class="alert alert-danger" role="alert" th:if="${param.error}">
+                        Неверное имя пользователя или пароль.
+                    </div>
+
+                    <!-- Email input-->
+                    <div class="row d-flex justify-content-center">
+                        <div class="form-group col-lg-6">
+                            <label class=" control-label" for="email">Email</label>
+                            <input id="email" name="username" type="text" placeholder=""
+                                   class="form-control input-md" required="">
+
+
+                        </div>
+                    </div>
+
+                    <!-- Password input-->
+                    <div class="row d-flex justify-content-center">
+                        <div class="form-group col-lg-6">
+                            <label class=" control-label" for="password">Пароль</label>
+                            <input id="password" name="password" type="password" placeholder=""
+                                   class="form-control input-md" required="">
+                            <small id="pass_change_label" class="text-muted">
+                                При необходимости сброса пароля пишите администраторам сервиса.
+                            </small>
+                        </div>
+                    </div>
+
+                    <div class="row d-flex justify-content-center">
+                        <!-- Button (Double) -->
+                        <div class="form-group col-lg-6">
+                            <label class="control-label" for="save"></label>
+                            <!--<input class="btn btn-default submit center" type="submit" value="Войти"/>-->
+                            <button id="save" name="save" type="submit" class="btn btn-success submit">Войти</button>
+                            <!-- <button id="clear" name="clear" class="btn btn-danger">Reset</button>-->
+                        </div>
+                    </div>
+                </fieldset>
+            </form>
+
+            <div class="separator">
+                <p>или</p>
+                <p class="change_link">
+                    <a href="/register" class="to_register"> Создать новый аккаунт </a>
+                </p>
+
+                <div class="clearfix"></div>
+                <br/>
+
+            </div>
+
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

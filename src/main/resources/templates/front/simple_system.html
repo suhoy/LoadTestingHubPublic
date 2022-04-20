@@ -1,0 +1,179 @@
+<!DOCTYPE HTML>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/thymeleaf-extras-springsecurity4">
+<head>
+    <!-- jQuery 3.5.1, 3.3.1, 3.2.0-->
+
+    <!-- Bootstrap 4.0.0 , 4.1.3, 4.2.1,  -->
+    <link th:href="${baseUrl + '/libs/bootstrap.min.css'}" rel="stylesheet"/>
+
+    <!-- filter table-->
+    <link th:href="${baseUrl + '/libs/jquery.datatables.min.css'}" rel="stylesheet"/>
+
+    <link th:href="${baseUrl + '/libs/datatables.datetime.min.css'}" rel="stylesheet"/>
+
+    <!-- table of content-->
+    <link th:href="${baseUrl + '/libs/bootstrap-toc.min.css'}" rel="stylesheet"/>
+
+    <!-- group table-->
+    <link th:href="${baseUrl + '/libs/bootstrap-table.min.css'}" rel="stylesheet">
+
+    <link th:href="${baseUrl + '/libs/bootstrap-table-group-by.css'}" rel="stylesheet">
+
+    <!-- include full calendar 3.10.2 css/js -->
+    <link th:href="${baseUrl + '/libs/fullcalendar.min.css'}" rel="stylesheet">
+
+    <!-- 0.8.18-->
+    <link th:href="${baseUrl + '/libs/summernote-bs4.min.css'}" rel="stylesheet">
+
+
+    <link th:href="${baseUrl + '/libs/decaf.min.css'}" rel="stylesheet"/>
+
+
+    <style>
+        @page {
+            @bottom-right {
+                content: "Страница " counter(page) " из " counter(pages);
+            }
+        }
+    </style>
+
+</head>
+
+
+<div class="col-lg-12 text-center">
+
+
+    <table th:style="'width:100%;'">
+
+
+        <tbody>
+        <tr>
+            <td th:style="'width:65%; align:left; text-align:left;'">
+                <br>
+                <br>
+                <span>Выгрузка по </span><span th:text="${reports.get(0).system.name}"></span>
+
+                <br>
+                <span>Количество отчётов: </span>
+                <span th:text="${reports.size()}"></span>
+
+                <br>
+                <span>Количество тестов: </span>
+                <span th:text="${countruns}"></span>
+
+                <br>
+                <span>Дата выгрузки: </span>
+                <span th:text="${today}"></span>
+
+            </td>
+            <td th:style="'width:35%; text-align:right;'"><img width="100" height="100" class="mt-5"
+                                                               th:src="${baseUrl + '/images/pdf_logo.png'}"></td>
+        </tr>
+        </tbody>
+    </table>
+
+
+    <br>
+    <br>
+    <!--<div style="page-break-before:always">&nbsp;</div>-->
+
+
+    <h3 th:text="${'Оглавление'}"></h3>
+    <div th:style="'align:left; text-align:left;'" id="TOC_SIMPLE_SYSTEM"></div>
+    <div style="page-break-before:always">&nbsp;</div>
+
+    <div th:style="'align:left; text-align:left;'">
+        <th:block th:each="report, repotIter : ${reports}">
+            <table class="table table-sm">
+                <thead>
+                <span th:attr="data-toc=${report.getName()}" th:text="${'Отчёт ['+(repotIter.index+1)+'] ' }"/>
+                <a th:text="${report.getName()}" th:href="${baseUrl + '/report_view?id=' + report.id}"/>
+                <br>
+                <span th:text="${'Дата: '+ df.format(report.date_created)}"/>
+                <br>
+                <span th:text="${'Статус: '+ report.status}"/>
+                <br>
+                <br>
+                </thead>
+                <tbody>
+                <tr th:each="run, runIter : ${report.orderedByDateRuns()}">
+                    <td th:style="'width:55%; align:left; text-align:left;'"><span th:text="${'Тест ['+(runIter.index+1)+'] ' }" /><a th:text="${run.getName()}" th:href="${baseUrl + '/run_view?id=' + run.id}"/></td>
+                    <td th:style="'width:25%; align:left; text-align:left;'" th:text="${run.status}"></td>
+                    <td th:style="'width:20%; align:left; text-align:left;'" th:text="${df.format(run.time_start)+' - '+df.format(run.time_finish)}"></td>
+                </tr>
+                </tbody>
+            </table>
+            <br>
+            <br>
+
+
+
+
+
+
+
+
+
+            <!--<th:block th:each="run : ${report.orderedByDateRuns()}">
+                <a th:text="${run.getName()}" th:href="${baseUrl + '/run_view?id=' + run.id}"/>
+                <br>
+            </th:block>
+            <br>-->
+        </th:block>
+    </div>
+
+    <!--<th:block th:each="report : ${reports}">
+
+        <div class="card">
+            <div class="card-body">
+                <div th:if="${report.runs.size()>0}" class="table-responsive-sm">
+                    <table id="tablerun" class="table table-sm">
+                        <thead>
+                        <tr>
+                            <th>Отчёт</th>
+                            <th>Статус</th>
+                            <th>Дата создания</th>
+                            <th>Ссылка на открытие</th>
+                            <th>Ссылка на скачивание</th>
+                        </tr>
+                        <tr>
+                            <td th:text="${report.name}"></td>
+                            <td th:text="${report.status}"></td>
+                            <td th:text="${df.format(report.date_created)}"></td>
+                            <td><a class="btn btn-success btn-small" th:href="@{'/report_view?id=' + ${report.id}}">Открыть</a>
+                            </td>
+                            <td><a class="btn btn-success btn-small" th:href="@{'/pdf_report?id=' + ${report.id}}">Скачать</a>
+                            </td>
+
+                        </tr>
+                        <tr>
+                            <th>Тест</th>
+                            <th>Статус</th>
+                            <th>Даты проведения</th>
+                            <th>Ссылка на открытие</th>
+                            <th>Ссылка на скачивание</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="run : ${report.runs}">
+                            <td th:text="${run.name}"></td>
+                            <td th:text="${run.status}"></td>
+                            <td th:text="${df.format(run.time_start)+' - '+df.format(run.time_finish)}"></td>
+                            <td><a class="btn btn-primary btn-small" th:href="@{'/run_view?id=' + ${run.id}}">Открыть</a>
+                            </td>
+                            <td><a class="btn btn-primary btn-small" th:href="@{'/pdf_run?id=' + ${run.id}}">Скачать</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <br>
+    </th:block>-->
+
+</div>
+
+
+</body>
+</html>
